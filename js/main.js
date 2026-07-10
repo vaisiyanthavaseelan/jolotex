@@ -316,22 +316,39 @@
   if (floatCta) {
     var kontaktSection = document.getElementById("kontakt");
     var cornerWatchEls = Array.prototype.slice.call(document.querySelectorAll(".stimmen__partners-grid, .cta-band"));
-    var overlapsCorner = function (el) {
-      var r = el.getBoundingClientRect();
-      return r.bottom > window.innerHeight - 90 && r.top < window.innerHeight && r.right > window.innerWidth - 220;
-    };
+    var pastCover = false;
+    var hideForKontakt = false;
+    var hideForCorner = false;
+
     var updateFloatCta = function () {
-      var pastCover = window.scrollY > window.innerHeight * 0.9;
-      var hideForKontakt = false;
-      if (kontaktSection) {
-        var r = kontaktSection.getBoundingClientRect();
-        hideForKontakt = r.top < window.innerHeight * 0.6 && r.bottom > 0;
-      }
-      var hideForCorner = cornerWatchEls.some(overlapsCorner);
       floatCta.classList.toggle("is-visible", pastCover && !hideForKontakt && !hideForCorner);
     };
+
+    window.addEventListener("scroll", function () {
+      pastCover = window.scrollY > window.innerHeight * 0.9;
+      updateFloatCta();
+    }, { passive: true });
+
+    if ("IntersectionObserver" in window) {
+      if (kontaktSection) {
+        var kontaktIO = new IntersectionObserver(function (entries) {
+          hideForKontakt = entries[0].isIntersecting;
+          updateFloatCta();
+        }, { rootMargin: "0px 0px -40% 0px" });
+        kontaktIO.observe(kontaktSection);
+      }
+      if (cornerWatchEls.length) {
+        var cornerTop = -(window.innerHeight - 90);
+        var cornerLeft = -(window.innerWidth - 220);
+        var cornerIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) { entry.target.__ctaOverlap = entry.isIntersecting; });
+          hideForCorner = cornerWatchEls.some(function (el) { return el.__ctaOverlap; });
+          updateFloatCta();
+        }, { rootMargin: cornerTop + "px 0px 0px " + cornerLeft + "px" });
+        cornerWatchEls.forEach(function (el) { cornerIO.observe(el); });
+      }
+    }
+
     updateFloatCta();
-    window.addEventListener("scroll", updateFloatCta, { passive: true });
-    window.addEventListener("resize", updateFloatCta);
   }
 })();

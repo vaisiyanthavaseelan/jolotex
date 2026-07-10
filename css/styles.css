@@ -111,7 +111,7 @@ body {
   font-size: var(--step-0);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
@@ -146,6 +146,7 @@ body::before {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding-block: 1.4rem;
   transition: padding 0.3s var(--ease), background 0.3s var(--ease);
+  transform: translateZ(0); -webkit-transform: translateZ(0); will-change: transform;
 }
 .masthead.is-scrolled {
   background: rgba(20, 16, 12, 0.86);
@@ -239,11 +240,12 @@ body::before {
   background: var(--rust); color: #14100c; padding: 0.9rem 1.5rem; border-radius: 999px;
   font-family: var(--font-mono); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em;
   text-decoration: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  opacity: 0; visibility: hidden; transform: translateY(14px);
+  opacity: 0; visibility: hidden; transform: translateY(14px) translateZ(0);
+  will-change: transform;
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0s linear 0.3s, background 0.2s var(--ease);
 }
 .float-cta.is-visible {
-  opacity: 1; visibility: visible; transform: translateY(0);
+  opacity: 1; visibility: visible; transform: translateY(0) translateZ(0);
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 .float-cta:hover { background: var(--rust-bright); }
@@ -578,6 +580,7 @@ body::before {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
+  .masthead { position: sticky; }
   .masthead.is-scrolled { background: var(--bg); backdrop-filter: none; box-shadow: 0 -100vh 0 0 var(--bg); }
 
   .chapter--auftrag .chapter__grid { grid-template-columns: 1fr; }
