@@ -28,15 +28,17 @@
     });
   }
 
-  /* Masthead solid background on scroll + keep --header-h in sync */
-  var masthead = document.querySelector("[data-masthead]");
-  if (masthead) {
-    window.addEventListener("scroll", function () {
-      masthead.classList.toggle("is-scrolled", window.scrollY > 12);
-    }, { passive: true });
+  /* Navbar solid background + smaller logo on scroll, keep --header-h in sync */
+  var navbar = document.querySelector("[data-navbar]");
+  if (navbar) {
+    var applyScrollState = function () {
+      navbar.classList.toggle("is-scrolled", window.scrollY > 12);
+    };
+    applyScrollState();
+    window.addEventListener("scroll", applyScrollState, { passive: true });
 
     var syncHeaderHeight = function () {
-      document.documentElement.style.setProperty("--header-h", masthead.offsetHeight + "px");
+      document.documentElement.style.setProperty("--header-h", navbar.offsetHeight + "px");
     };
     syncHeaderHeight();
     window.addEventListener("resize", syncHeaderHeight);
@@ -100,9 +102,11 @@
   /* Gewerke accordion + image-swap stage */
   var ICON_BERATUNG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>';
   var STAGE_DATA = {
-    beratung: { index: "01", name: "Beratung", solid: true, icon: ICON_BERATUNG },
+    beratung: { index: "01", name: "Beratung", blocks: [
+      { type: "single", src: "assets/images/optimized/pf-beratung-g1-960.webp", alt: "Beratungsgespräch mit Bauherren am Tisch, im Hintergrund die Baustelle" }
+    ] },
     abriss: { index: "02", name: "Abriss", blocks: [
-      { type: "single", src: "assets/images/optimized/pf-abriss-g6-480.webp", alt: "JoLoTex Baumfäll- und Rückschnittarbeiten: Holzgreifer verlädt Stämme auf Anhänger" }
+      { type: "single", src: "assets/images/optimized/pf-abriss-g6-960.webp", alt: "JoLoTex Baumfäll- und Rückschnittarbeiten: Holzgreifer verlädt Stämme auf Anhänger" }
     ] },
     rohbau: { index: "03", name: "Rohbau", blocks: [
       { type: "single", src: "assets/images/optimized/pf-rohbau-hero-900.webp", alt: "Rohbau eines Wohnhauses mit Gerüst und Ziegelmauerwerk" }
@@ -115,7 +119,10 @@
     fliesen: { index: "05", name: "Fliesen", blocks: [
       { type: "pair",
         before: ["assets/images/optimized/pf-fliesen-g5-480.webp", "Bad vorher: Mosaikfliesen werden verlegt, Rohboden sichtbar"],
-        after: ["assets/images/optimized/pf-fliesen-g3-480.webp", "Bad nachher: fertiges Bad mit schwarzen Waschbecken und Sechseckfliesen"] }
+        after: ["assets/images/optimized/pf-fliesen-g3-480.webp", "Bad nachher: fertiges Bad mit schwarzen Waschbecken und Sechseckfliesen"] },
+      { type: "pair",
+        before: ["assets/images/optimized/pf-fliesen-g9-480.webp", "Gäste-WC vorher: frisch verlegte weiße Wandfliesen mit Nivelliersystem"],
+        after: ["assets/images/optimized/pf-fliesen-g10-480.webp", "Gäste-WC nachher: fertiges WC mit Strukturfliesen, Mosaikband und schwarzem Sechseckboden"] }
     ] },
     fassade: { index: "06", name: "Fassade", blocks: [
       { type: "pair",
@@ -316,39 +323,22 @@
   if (floatCta) {
     var kontaktSection = document.getElementById("kontakt");
     var cornerWatchEls = Array.prototype.slice.call(document.querySelectorAll(".stimmen__partners-grid, .cta-band"));
-    var pastCover = false;
-    var hideForKontakt = false;
-    var hideForCorner = false;
-
+    var overlapsCorner = function (el) {
+      var r = el.getBoundingClientRect();
+      return r.bottom > window.innerHeight - 90 && r.top < window.innerHeight && r.right > window.innerWidth - 220;
+    };
     var updateFloatCta = function () {
+      var pastCover = window.scrollY > window.innerHeight * 0.9;
+      var hideForKontakt = false;
+      if (kontaktSection) {
+        var r = kontaktSection.getBoundingClientRect();
+        hideForKontakt = r.top < window.innerHeight * 0.6 && r.bottom > 0;
+      }
+      var hideForCorner = cornerWatchEls.some(overlapsCorner);
       floatCta.classList.toggle("is-visible", pastCover && !hideForKontakt && !hideForCorner);
     };
-
-    window.addEventListener("scroll", function () {
-      pastCover = window.scrollY > window.innerHeight * 0.9;
-      updateFloatCta();
-    }, { passive: true });
-
-    if ("IntersectionObserver" in window) {
-      if (kontaktSection) {
-        var kontaktIO = new IntersectionObserver(function (entries) {
-          hideForKontakt = entries[0].isIntersecting;
-          updateFloatCta();
-        }, { rootMargin: "0px 0px -40% 0px" });
-        kontaktIO.observe(kontaktSection);
-      }
-      if (cornerWatchEls.length) {
-        var cornerTop = -(window.innerHeight - 90);
-        var cornerLeft = -(window.innerWidth - 220);
-        var cornerIO = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) { entry.target.__ctaOverlap = entry.isIntersecting; });
-          hideForCorner = cornerWatchEls.some(function (el) { return el.__ctaOverlap; });
-          updateFloatCta();
-        }, { rootMargin: cornerTop + "px 0px 0px " + cornerLeft + "px" });
-        cornerWatchEls.forEach(function (el) { cornerIO.observe(el); });
-      }
-    }
-
     updateFloatCta();
+    window.addEventListener("scroll", updateFloatCta, { passive: true });
+    window.addEventListener("resize", updateFloatCta);
   }
 })();
