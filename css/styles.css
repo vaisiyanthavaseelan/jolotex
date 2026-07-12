@@ -290,6 +290,7 @@ body::before {
 }
 
 /* ---------- Chapter shared ---------- */
+.cover, .chapter { scroll-margin-top: calc(var(--header-h) + 1rem); }
 .chapter { padding-block: clamp(4.5rem, 10vw, 8.5rem); position: relative; }
 .chapter--rule { border-top: 1px solid var(--line); }
 .chapter__num {
@@ -325,7 +326,7 @@ body::before {
 /* ---------- Gewerke (services accordion) ---------- */
 .gewerke { display: grid; grid-template-columns: 1fr 0.95fr; gap: clamp(2rem, 5vw, 4rem); align-items: flex-start; }
 .gewerke__list { display: flex; flex-direction: column; }
-.gewerke__item { border-top: 1px solid var(--line); }
+.gewerke__item { border-top: 1px solid var(--line); scroll-margin-top: calc(var(--header-h) + 1rem); }
 .gewerke__item:last-child { border-bottom: 1px solid var(--line); }
 .gewerke__trigger {
   width: 100%; display: flex; align-items: baseline; gap: clamp(1rem, 2.5vw, 2rem);

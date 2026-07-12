@@ -192,6 +192,11 @@
           trigger.setAttribute("aria-expanded", "true");
           setPanelHeight(item, true);
           setStage(key);
+          setTimeout(function () {
+            var offset = parseFloat(getComputedStyle(item).scrollMarginTop) || 0;
+            var targetY = item.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top: targetY, behavior: "smooth" });
+          }, 420);
         }
       });
       trigger.addEventListener("mouseenter", function () { setStage(key); });
